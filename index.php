@@ -1,0 +1,1 @@
+You are connected to <?=$_SERVER['REMOTE_ADDR'];?>

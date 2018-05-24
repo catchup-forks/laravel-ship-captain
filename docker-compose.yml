@@ -1,0 +1,231 @@
+version: '3'
+
+networks:
+  frontend:
+    driver: "bridge"
+  backend:
+    driver: "bridge"
+
+volumes:
+  mysql:
+    driver: "local"
+  redis:
+    driver: "local"
+  phpmyadmin:
+    driver: "local"
+  elasticsearch:
+    driver: "local"
+
+services:
+
+    base:
+      container_name: base
+      build:
+        context: ./docker/base
+        args:
+          - PUID=1000
+          - PGID=1000
+          - TZ=UTC
+      environment:
+        - PHP_IDE_CONFIG=serverName=docker
+      volumes:
+        - .:/var/www:cached
+      extra_hosts:
+        - "dockerhost:10.0.75.1"
+      ports:
+        - "2222:22"
+      networks:
+        - frontend
+        - backend
+      tty: true
+
+    php-fpm:
+      build:
+        context: ./docker/php-fpm
+      environment:
+        - PHP_IDE_CONFIG=serverName=docker
+        - SERVICE_NAME=php-fpm
+        - SERVICE_TAGS=php-fpm
+      volumes:
+        - ./docker/php-fpm/php.ini:/usr/local/etc/php/php.ini
+        - .:/var/www:cached
+      expose:
+        - "9000"
+      extra_hosts:
+        - "dockerhost:10.0.75.1"
+      networks:
+        - backend
+        - frontend
+      depends_on:
+        - haproxy
+        - base
+      tty: true
+
+    consul:
+      command: agent -server -bind=127.0.0.1 -bootstrap-expect=1 -client=0.0.0.0
+      build:
+        context: ./docker/consul
+      environment:
+        CONSUL_LOCAL_CONFIG: '{"skip_leave_on_interrupt": true, "ui": true,  "dns_config": { "allow_stale": false }}'
+      ports:
+        - "8500:8500"
+      networks:
+        - frontend
+        - backend
+
+    registrator:
+      command: -internal consul://consul:8500
+      build:
+        context: ./docker/registrator
+      volumes:
+        - "/var/run/docker.sock:/tmp/docker.sock"
+      networks:
+        - frontend
+        - backend
+      links:
+        - consul
+
+    haproxy:
+      build:
+        context: ./docker/haproxy
+      ports:
+        - "5000:5000"
+        - "1936:1936"
+      networks:
+        - frontend
+        - backend
+      links:
+        - consul
+      depends_on:
+        - registrator
+
+    cadvisor:
+      build:
+        context: ./docker/cadvisor
+      volumes:
+        - "/:/rootfs:ro"
+        - "/var/run:/var/run:rw"
+        - "/sys:/sys:ro"
+        - "/var/lib/docker/:/var/lib/docker:ro"
+      ports:
+        - "8080:8080"
+
+    supervisord:
+      build:
+        context: ./docker/supervisord
+      volumes:
+        - .:/var/www:cached
+        - ./docker/supervisord/supervisord.d:/etc/supervisord.d
+      extra_hosts:
+        - "dockerhost:10.0.75.1"
+      networks:
+        - backend
+      depends_on:
+        - base
+
+    nginx:
+      build:
+        context: ./docker/nginx
+        args:
+          - PHP_UPSTREAM_CONTAINER=php-fpm
+          - PHP_UPSTREAM_PORT=9000
+      volumes:
+        - .:/var/www:cached
+        - ./docker/logs/nginx/:/var/log/nginx
+        - ./docker/nginx/sites/:/etc/nginx/sites-available
+      ports:
+        - "80:80"
+        - "443:443"
+      networks:
+        - frontend
+        - backend
+      links:
+        - haproxy
+
+    mysql:
+      build:
+        context: ./docker/mysql
+      environment:
+        - MYSQL_DATABASE=docker
+        - MYSQL_USER=docker
+        - MYSQL_PASSWORD=docker
+        - MYSQL_ROOT_PASSWORD=docker
+        - TZ=UTC
+      volumes:
+        - ~/.docker/laravel-ship-captain/data/mysql:/var/lib/mysql
+        - ./docker/mysql/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      ports:
+        - "3306:3306"
+      networks:
+        - backend
+        - frontend
+
+    redis:
+      build:
+        context: ./docker/redis
+      volumes:
+        - ~/.docker/laravel-ship-captain/data/redis:/data
+      ports:
+        - "6379:6379"
+      networks:
+        - backend
+
+    phpmyadmin:
+      build:
+        context: ./docker/phpmyadmin
+      environment:
+        - PMA_ARBITRARY=1
+        - MYSQL_USER=docker
+        - MYSQL_PASSWORD=docker
+        - MYSQL_ROOT_PASSWORD=docker
+      ports:
+        - "2777:80"
+      networks:
+        - frontend
+        - backend
+      depends_on:
+        - base
+        - mysql
+
+    elasticsearch:
+      build:
+        context: ./docker/elasticsearch
+      environment:
+        - cluster.name=docker-cluster
+        - bootstrap.memory_lock=true
+        - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      volumes:
+        - elasticsearch:/usr/share/elasticsearch/data
+      ulimits:
+        memlock:
+          soft: -1
+          hard: -1
+      ports:
+        - "9200:9200"
+        - "9300:9300"
+      networks:
+        - frontend
+        - backend
+
+    laravel-echo-server:
+      build:
+        context: ./docker/laravel-echo-server
+      volumes:
+        - ./docker/laravel-echo-server/laravel-echo-server.json:/app/laravel-echo-server.json:ro
+      ports:
+        - "6001:6001"
+      networks:
+        - frontend
+        - backend
+      depends_on:
+        - redis
+        - mysql
+
+    #aws:
+    #  build:
+    #    context: ./docker/aws
+    #  volumes:
+    #    - .:/var/www:cached
+    #  depends_on:
+    #    - base
+    #  tty: true
