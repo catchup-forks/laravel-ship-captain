@@ -126,9 +126,6 @@ services:
     nginx:
       build:
         context: ./docker/nginx
-        args:
-          - PHP_UPSTREAM_CONTAINER=php-fpm
-          - PHP_UPSTREAM_PORT=9000
       volumes:
         - .:/var/www:cached
         - ./docker/logs/nginx/:/var/log/nginx
