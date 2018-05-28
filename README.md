@@ -2,7 +2,18 @@
 A repository containing Docker containers and configs for basic Laravel development & production environment.
 
 ## How to build & run
-You just have to build the images:
+
+Before building, to prevent any unwanted errors caused by the `.sh` files' executions, make sure you have executable rights on `make-executable.sh` and run it:
+
+```bash
+$ chmod +x make-executable.sh
+```
+
+```bash
+$ ./make-executable.sh
+```
+
+You then have to build the images:
 
 ```bash
 $ docker-compose build
@@ -36,7 +47,7 @@ $ docker-compose up -d
 * AWS load balancer service available.
 
 ## Services running on ports
-* `80`: Your server
+* `80`: Your frontend-accesible server.
 * `1936`: HAProxy stats
 * `2777`: PHPMyAdmin
 * `8080`: Metrics about hardware (`cadvisor` service)
