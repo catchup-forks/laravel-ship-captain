@@ -130,6 +130,7 @@ services:
         - .:/var/www:cached
         - ./docker/logs/nginx/:/var/log/nginx
         - ./docker/nginx/sites/:/etc/nginx/sites-available
+        - ./docker/nginx/ssl/:/etc/nginx/ssl
       ports:
         - "80:80"
         - "443:443"
