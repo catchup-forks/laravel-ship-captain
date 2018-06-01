@@ -219,6 +219,17 @@ services:
         - redis
         - mysql
 
+    grafana:
+      build:
+        context: ./docker/grafana
+      volumes:
+        - ~/.docker/laravel-ship-captain/data/grafana:/var/lib/grafana
+      ports:
+        - "2799:2799"
+      networks:
+        - backend
+        - frontend
+
     #aws:
     #  build:
     #    context: ./docker/aws
