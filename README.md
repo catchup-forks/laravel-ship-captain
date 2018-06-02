@@ -35,6 +35,7 @@ $ docker-compose up -d
 * `mysql`: MySQL 5.7 for SQL database.
 * `redis`: Redis server for Queues & in-memory storage.
 * `phpmyadmin`: SQL control panel.
+* `grafana`: For advanced metrics & graphs.
 * `elasticsearch`: Latest ElasticSearch server to optimize searching.s
 * `laravel-echo-server`: Laravel Echo Server for broadcasting.
 
@@ -50,6 +51,7 @@ $ docker-compose up -d
 * `80`: Your frontend-accesible server.
 * `1936`: HAProxy stats
 * `2777`: PHPMyAdmin
+* `2799`: Grafana
 * `8080`: Metrics about hardware (`cadvisor` service)
 * `8500`: Metrics about containers (`consul` service)
 
