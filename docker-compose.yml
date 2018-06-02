@@ -225,7 +225,7 @@ services:
       volumes:
         - ~/.docker/laravel-ship-captain/data/grafana:/var/lib/grafana
       ports:
-        - "2799:2799"
+        - "3000:3000"
       networks:
         - backend
         - frontend

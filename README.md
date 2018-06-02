@@ -51,7 +51,7 @@ $ docker-compose up -d
 * `80`: Your frontend-accesible server.
 * `1936`: HAProxy stats
 * `2777`: PHPMyAdmin
-* `2799`: Grafana
+* `3000`: Grafana
 * `8080`: Metrics about hardware (`cadvisor` service)
 * `8500`: Metrics about containers (`consul` service)
 
