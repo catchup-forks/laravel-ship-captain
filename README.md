@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/rennokki/eloquent-settings.svg?branch=master)](https://travis-ci.org/rennokki/eloquent-settings)
+
 # Laravel Ship Captain
 A repository containing Docker containers and configs for basic Laravel development & production environment.
 
