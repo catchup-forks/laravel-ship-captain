@@ -187,7 +187,7 @@ RUN echo "" >> ~/.bashrc && \
 # Install Laravel Envoy.
 USER whale
 
-RUN composer global require "laravel/envoy=~1.0"
+RUN composer global require "laravel/envoy"
 
 # Install Laravel installer.
 USER root
