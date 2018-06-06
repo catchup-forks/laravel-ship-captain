@@ -11,6 +11,8 @@ Before building, to prevent any unwanted errors caused by the `.sh` files' execu
 $ chmod +x make-executable.sh
 ```
 
+Also, the `base` service will copy `id_rsa` and `id_rsa.pub` from the `docker/base/ssh` folder. Don't forget to generate your own SSH keys and replace them, as well as the `.ppk` file. This will ensure protection and unique identity of your base container (and environment).
+
 ```bash
 $ ./make-executable.sh
 ```
