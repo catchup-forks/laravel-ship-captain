@@ -1,50 +1,45 @@
 [![Build Status](https://travis-ci.org/rennokki/eloquent-settings.svg?branch=master)](https://travis-ci.org/rennokki/eloquent-settings)
 
 # Laravel Ship Captain
-A repository containing Docker containers and configs for basic Laravel development & production environment.
+Laravel Ship Captain is a bunch of Docker containers and configs for basic Laravel development & production environment.
 
 ## How to build & run
-
 Before building, to prevent any unwanted errors caused by the `.sh` files' executions, make sure you have executable rights on `make-executable.sh` and run it:
-
 ```bash
 $ chmod +x make-executable.sh
 ```
-
-Also, the `base` service will copy `id_rsa` and `id_rsa.pub` from the `docker/base/ssh` folder. Don't forget to generate your own SSH keys and replace them. This will ensure protection and unique identity of your base container (and environment).
-
 ```bash
 $ ./make-executable.sh
 ```
 
-You then have to build the images:
+The `base` service will copy `id_rsa` and `id_rsa.pub` from the `docker/base/ssh` folder. Don't forget to generate your own SSH keys and replace them. This will ensure protection and unique identity of your base container (and environment).
 
+You then have to build the images:
 ```bash
 $ docker-compose build
 ```
 
 After building the images, you can create the containers:
-
 ```bash
 $ docker-compose up -d
 ```
 
 ## Available containers
 * `base`: Linux environment with basic packages installed.
-* `php-fpm`: PHP 7.2 environment which can run PHP apps.
-* `consul`, `registrator`, `haproxy`: Used for load balancing across many `php-fpm` containers.
+* `php-fpm`: PHP 7.2 environment.
+* `consul`, `registrator`, `haproxy`: Used for load balancing across your `php-fpm` containers.
 * `cadvisor`: Metrics about hardware.
 * `supervisord`: PHP 7.2 environment for Supervsirod.
 * `nginx`: Proxy to handle the requests.
 * `mysql`: MySQL 5.7 for SQL database.
 * `redis`: Redis server for Queues & in-memory storage.
-* `phpmyadmin`: SQL control panel.
-* `grafana`: For advanced metrics & graphs.
-* `elasticsearch`: Latest ElasticSearch server to optimize searching.s
-* `laravel-echo-server`: Laravel Echo Server for broadcasting.
+* `phpmyadmin`: Control Panel for the MySQL database.
+* `grafana`: For advanced metrics & graphs across services.
+* `elasticsearch`: Latest ElasticSearch server to optimize searching.
+* `laravel-echo-server`: Laravel Echo Server to handle broadcasting.
 
 ## Features
-* PHP 7.2 - it's time for an upgrade.
+* PHP 7.2 - Sorry for pre-7.1 users.
 * Configurable PHP and MySQL.
 * Proxy & Load Balacing across `php-fpm` containers.
 * Crontab already set (cron running every minute)
@@ -64,7 +59,6 @@ You are free to configure it the way you want. You have env variables inside the
 
 By default, in Laravel, the `index.php` file is located in the root, in `public` directory.
 If your `index.php` is somewhere else (i.e. in the root of your project), you can change it in the `docker/nginx/sites/default.conf` file:
-
 ```
 ...
   server_name localhost;
@@ -89,13 +83,11 @@ This applies even backwards: when the containers are destroyed, the users can't 
 
 ## Run certain services
 The build command mentioned earlier makes sure you get the whole suite. In case you need just PHP & MySQL and Redis, you can easily run:
-
 ```bash
 $ docker-compose build base php-fpm mysql redis
 ```
 
-and then run the containers:
-
+You then can run the containers:
 ```bash
 $ docker-compose up -d base php-fpm mysql redis
 ```
@@ -104,15 +96,14 @@ Note: Many services require `base` container. It's better to build it to make su
 The `base` container can help you connect remotely via bash to it and run commands in the environment.
 
 To do so, you can use `docker ps` to locate the containers' hashes and then connect to it via console:
-
 ```bash
 $ docker exec -it <container_hash> bash
 ```
 
 If you are on Windows, you should prefix the previous command with `winpty`:
-
 ```bash
 $ winpty docker exec -it <container_hash> bash
 ```
+
 ## AWS Load Balancer
 The `docker-compose.yml` comes with pre-configured AWS Load Balancer settings. All you have to do is uncommenting it from `docker-compose.yml` and throw your SSH keys in `docker/aws/ssh` folder.
